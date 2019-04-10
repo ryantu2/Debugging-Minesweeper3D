@@ -6,7 +6,7 @@ namespace Minesweeper3D
 {
     public class Grid : MonoBehaviour
     {
-        public GameObject tiePrefab; // Prefab to spawn
+        public GameObject TilePrefab; // Prefab to spawn
         public int width = 10, height = 10, depth = 10; // Grid dimensions
         public int mineCount = 5;
         public float spacing = 1.1f; // Spacing between each tile
@@ -16,22 +16,22 @@ namespace Minesweeper3D
         Tile SpawnTile(Vector3 position)
         {
             // Clone the tile prefab
-            GameObject clone = InstantiatetilePrefab, transform);
+            GameObject clone = Instantiate( TilePrefab, transform);
             // Edit it's properties
             clone.transform.position = position;
             // Return the Tile component of clone
-            return clone.GetComponent<Tie>();
+            return clone.GetComponent<Tile>();
         }
         void GenerateTiles()
         {
             // Instantiate the new 3D array of size width x height x depth
-            tiles = new Tile[with, height, depth];
+            tiles = new Tile[width, height, depth];
 
             // Store half the size of the grid
-            Vector3 halfSize = new Vecto3(width * .5f, height * .5f, depth * .5f);
+            Vector3 halfSize = new Vector3(width * .5f, height * .5f, depth * .5f);
 
             // Offset
-            Vector3 offset = new Vecto3(.5f, .5f, .5f);
+            Vector3 offset = new Vector3(.5f, .5f, .5f);
             
             // Loop through the entire list of tiles
             for (int x = 0; x < width; x++)
@@ -41,11 +41,11 @@ namespace Minesweeper3D
                     for (int z = 0; z < depth; z++)
                     {
                         // Generate position for current tile
-                        Vector3 postion = new Vector3(x - halfSize.x,
+                        Vector3 position = new Vector3(x - halfSize.x,
                                                        y - halfSize.y,
                                                        z - halfSize.z);
                         // Offset position to center
-                        position += offset
+                        position += offset;
                         // Apply spacing
                         position *= spacing;
                         // Spawn a new tile
@@ -68,10 +68,10 @@ namespace Minesweeper3D
         bool IsOutOfBounds(int x, int y, int z)
         {
             return x < 0 || x >= width ||
-                   y < 0 || y >= hht ||
+                   y < 0 || y >= height ||
                    z < 0 || z >= depth;
         }
-        int GetAdjacentMineCount(Tile tile)
+        int GetAdjacentmineCount(Tile tile)
         {
             // Set count to 0
             int count = 0;
@@ -83,19 +83,19 @@ namespace Minesweeper3D
                     for (int z = -1; z <= 1; z++)
                     {
                         // Calculate which adjacent tile to look at
-                        int desiredX tile.x + x;
+                        int desiredX = tile.x + x;
                         int desiredY = tile.y + y;
                         int desiredZ = tile.z + z;
                         // Check if the desired x & y is outside bounds
                         if (IsOutOfBounds(desiredX, desiredY, desiredZ))
                         {
                             // Continue to next element in the loop
-                            ctinue;
+                            continue;
                         }
                         // Select current tile
                         Tile currentTile = tiles[desiredX, desiredY, desiredZ];
                         // Check if that tile is a mine
-                        if (currentTile isMine)
+                        if (currentTile.isMine)
                         {
                             // Increase count by 1
                             count++;
@@ -109,7 +109,7 @@ namespace Minesweeper3D
         void FFuncover(int x, int y, int z, bool[,,] visited)
         {
             // Is x and y out of bounds of the grid?
-            if (IsOutOfBous(x, y, z))
+            if (IsOutOfBounds(x, y, z))
             {
                 // Exit
                 return;
@@ -122,9 +122,9 @@ namespace Minesweeper3D
                 return;
             }
             // Reveal that tile in that X and Y coordinate
-            Tile tile = tles[x, y, z];
+            Tile tile = tiles[x, y, z];
             // Get number of mines around that tile
-            int adjacentMines = GetAdjacentMineCount(tile);
+            int adjacentMines = GetAdjacentmineCount(tile);
             // Reveal the tile
             tile.Reveal(adjacentMines);
 
@@ -134,29 +134,29 @@ namespace Minesweeper3D
                 // This tile has been visited
                 visited[x, y, z] = true;
                 // Visit all other tiles around this tile
-                FFucover(x - 1, y, z, visited);
-                FFuncver(x + 1, y, z, visited);
+                FFuncover(x - 1, y, z, visited);
+                FFuncover(x + 1, y, z, visited);
 
-                FFunover(x, y - 1, z, visited);
-                Funcover(x, y + 1, z, visited);
+                FFuncover(x, y - 1, z, visited);
+                FFuncover(x, y + 1, z, visited);
     
-                Funcover(x, y, z - 1, visited);
-                FFucover(x, y, z + 1, visited);
+                FFuncover(x, y, z - 1, visited);
+                FFuncover(x, y, z + 1, visited);
             }
         }
         // Scans the grid to check if there are no more empty tiles
         bool NoMoreEmptyTiles()
         {
             // Set empty tile count to 0
-            int emptyileCount = 0;
+            int emptyTileCount = 0;
             // Loop through 2D array
-            for (int x = 0; x < with; x++)
+            for (int x = 0; x < width; x++)
             {
                 for (int y = 0; y < height; y++)
                 {
                     for (int z = 0; z < depth; z++)
                     {
-                        Tile tile = tils[x, y, z];
+                        Tile tile = tiles[x, y, z];
                         // If tile is revealed or is a mine
                         if (tile.isRevealed || tile.isMine)
                         {
@@ -164,7 +164,7 @@ namespace Minesweeper3D
                             continue;
                         }
                         // An empty tile has not been revealed
-                        emptyTilCount++;
+                        emptyTileCount++;
                     }
                 }
             }
@@ -195,7 +195,7 @@ namespace Minesweeper3D
         // Performs set of actions on selected tile
         void SelectTile(Tile selected)
         {
-            int adjacentMines = GetAdjacentMineCount(selected);
+            int adjacentMines = GetAdjacentmineCount(selected);
             selected.Reveal(adjacentMines);
 
             // Is the selected tile a mine?
@@ -227,7 +227,7 @@ namespace Minesweeper3D
 
         Tile GetHitTile(Vector2 mousePosition)
         {
-            Ray camRay = Camera.main ScreenPointToRay(Input.mousePosition);
+            Ray camRay = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if (Physics.Raycast(camRay, out hit))
             {
@@ -238,7 +238,7 @@ namespace Minesweeper3D
         // Raycasts to find a hit tile
         void MouseOver()
         {
-            if (Input.GetMouseBu tonDown(0))
+            if (Input.GetMouseButtonDown(0))
             {
                 Tile hitTile = GetHitTile(Input.mousePosition);
                 if (hitTile)
@@ -246,7 +246,7 @@ namespace Minesweeper3D
                     SelectTile(hitTile);
                 }
             }
-            if(Input.GetMouseButonDown(2))
+            if(Input.GetMouseButtonDown(2))
             {
                 Tile hitTile = GetHitTile(Input.mousePosition);
                 if (hitTile)
@@ -258,7 +258,7 @@ namespace Minesweeper3D
         // Update is called once per frame
         void Update()
         {
-            MousOver();
+            MouseOver();
         }
     }
 
